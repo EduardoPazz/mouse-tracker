@@ -1,7 +1,7 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import { usePointerCoordinates } from "@/hooks/usePointerCoordinates";
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, LegacyRef, useEffect, useRef } from "react";
 
 const PointerTracker = () => {
   const pointerCoordinates = usePointerCoordinates();
@@ -31,7 +31,10 @@ const PointerTracker = () => {
 
 const Tracker = forwardRef(function Tracker(_, ref) {
   return (
-    <span ref={ref} style={{ position: "absolute" }}>
+    <span
+      ref={ref as LegacyRef<HTMLSpanElement>}
+      style={{ position: "absolute" }}
+    >
       <img
         src={"https://cdn-icons-png.flaticon.com/512/9905/9905142.png"}
         alt={"."}
@@ -79,7 +82,7 @@ const Circle = () => {
   }, [circleRef, trackerRef, mouse]);
 
   return (
-    <div className={styles.circle} ref={circleRef}>
+    <div className={styles.circle} ref={circleRef as LegacyRef<HTMLDivElement>}>
       <Tracker ref={trackerRef} />
     </div>
   );
