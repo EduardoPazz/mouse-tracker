@@ -1,9 +1,89 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import styles from "@/styles/Home.module.css";
+import { usePointerCoordinates } from "@/hooks/usePointerCoordinates";
+import { forwardRef, useEffect, useRef } from "react";
 
-const inter = Inter({ subsets: ['latin'] })
+const PointerTracker = () => {
+  const pointerCoordinates = usePointerCoordinates();
+
+  const cheeseRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const cheese = cheeseRef?.current;
+
+    if (!cheese) throw new Error(`Cheese is ${cheese}`);
+
+    const cheeseRect = cheese.getBoundingClientRect();
+
+    cheese.style.left = `${pointerCoordinates.x - cheeseRect.width / 2}px`;
+    cheese.style.top = `${pointerCoordinates.y - cheeseRect.height / 2}px`;
+  }, [pointerCoordinates, cheeseRef]);
+
+  return (
+    <span
+      ref={cheeseRef}
+      style={{ position: "absolute", fontSize: "70px", cursor: "grab" }}
+    >
+      🧀
+    </span>
+  );
+};
+
+const Tracker = forwardRef(function Tracker(_, ref) {
+  return (
+    <span ref={ref} style={{ position: "absolute" }}>
+      <img
+        src={"https://cdn-icons-png.flaticon.com/512/9905/9905142.png"}
+        alt={"."}
+        width={"50px"}
+      />
+    </span>
+  );
+});
+
+const Circle = () => {
+  const circleRef = useRef<Element>(null);
+  const trackerRef = useRef<HTMLElement>(null);
+  const mouse = usePointerCoordinates();
+
+  useEffect(() => {
+    const rect = circleRef?.current?.getBoundingClientRect();
+
+    if (!rect) throw new Error(`DOMRect is ${rect}`);
+
+    const { left, top, width, height } = rect,
+      eyeCenter = {
+        x: left + width / 2,
+        y: top + height / 2,
+      };
+
+    const cathetusX = mouse.x - eyeCenter.x;
+    const cathetusY = mouse.y - eyeCenter.y;
+    const hypotenuse = Math.sqrt(cathetusX * cathetusX + cathetusY * cathetusY);
+
+    const scaleRate = ((width / 2) * 0.7) / hypotenuse;
+
+    const tracker = trackerRef?.current;
+
+    if (!tracker) throw new Error(`Eye is ${rect}`);
+
+    const trackerRect = tracker.getBoundingClientRect();
+
+    tracker.style.left = `${
+      width / 2 - trackerRect.width / 2 + cathetusX * scaleRate
+    }px`;
+
+    tracker.style.top = `${
+      height / 2 - trackerRect.height / 2 + cathetusY * scaleRate
+    }px`;
+  }, [circleRef, trackerRef, mouse]);
+
+  return (
+    <div className={styles.circle} ref={circleRef}>
+      <Tracker ref={trackerRef} />
+    </div>
+  );
+};
 
 export default function Home() {
   return (
@@ -15,109 +95,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
+        Move the cheese around
+        <Circle />
+        <PointerTracker />
       </main>
     </>
-  )
+  );
 }
